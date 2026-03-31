@@ -17,15 +17,39 @@ public class TradeService {
     }
 
     // 🔥 REAL LIVE CRYPTO PRICES (CoinGecko API)
+    // 🔥 SAFE LIVE + FALLBACK PRICES
     public Map<String, Object> getPrices() {
 
         String url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd";
 
         RestTemplate restTemplate = new RestTemplate();
 
-        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+        try {
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            return response;
 
-        return response;
+        } catch (Exception e) {
+
+            // 🔥 Fallback if API fails (VERY IMPORTANT)
+            Map<String, Object> fallback = new HashMap<>();
+
+            Map<String, Double> btc = new HashMap<>();
+            btc.put("usd", 67000.0);
+
+            Map<String, Double> eth = new HashMap<>();
+            eth.put("usd", 2000.0);
+
+            Map<String, Double> sol = new HashMap<>();
+            sol.put("usd", 80.0);
+
+            fallback.put("bitcoin", btc);
+            fallback.put("ethereum", eth);
+            fallback.put("solana", sol);
+
+            System.out.println("⚠️ CoinGecko API failed, using fallback data");
+
+            return fallback;
+        }
     }
 
     // 🔥 BUY
