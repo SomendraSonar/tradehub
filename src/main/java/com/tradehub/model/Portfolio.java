@@ -11,43 +11,34 @@ public class Portfolio {
 
     private String coinName;
     private double quantity;
-    private Long userId;
 
-    // 🔥 BUY
-    public void buy(String coin, double amount) {
-        if (this.coinName == null) {
-            this.coinName = coin;
-        }
+    private Long userId;   // 🔥 REQUIRED (YOU MISSED THIS)
 
-        if (!this.coinName.equalsIgnoreCase(coin)) {
-            throw new RuntimeException("Different coin in this portfolio");
-        }
+    public Portfolio() {}
 
-        this.quantity += amount;
+    public Portfolio(String coinName, double quantity, Long userId) {
+        this.coinName = coinName;
+        this.quantity = quantity;
+        this.userId = userId;
     }
 
-    // 🔥 SELL
-    public void sell(String coin, double amount) {
-        if (!this.coinName.equalsIgnoreCase(coin)) {
-            throw new RuntimeException("Coin mismatch");
-        }
-
-        if (this.quantity < amount) {
-            throw new RuntimeException("Insufficient balance");
-        }
-
-        this.quantity -= amount;
+    public Long getId() {
+        return id;
     }
 
-    // GETTERS & SETTERS
-    public Long getId() { return id; }
+    public String getCoinName() {
+        return coinName;
+    }
 
-    public String getCoinName() { return coinName; }
-    public void setCoinName(String coinName) { this.coinName = coinName; }
+    public double getQuantity() {
+        return quantity;
+    }
 
-    public double getQuantity() { return quantity; }
-    public void setQuantity(double quantity) { this.quantity = quantity; }
+    public Long getUserId() {
+        return userId;
+    }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public void setQuantity(double quantity) {
+        this.quantity = quantity;
+    }
 }

@@ -4,8 +4,11 @@ import com.tradehub.model.Portfolio;
 import com.tradehub.service.TradeService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/trade")
 public class TradeController {
 
     private final TradeService service;
@@ -14,32 +17,37 @@ public class TradeController {
         this.service = service;
     }
 
-    @PostMapping("/buy")
-    public Portfolio buy(@RequestParam Long userId,
-                         @RequestParam String coin,
-                         @RequestParam double qty) {
-        return service.buy(userId, coin, qty);
+    // GET prices
+    @GetMapping("/prices")
+    public Map<String, Object> getPrices() {
+        return service.getPrices();
     }
 
-    @PostMapping("/sell")
-    public Portfolio sell(@RequestParam Long userId,
-                          @RequestParam String coin,
-                          @RequestParam double qty) {
-        return service.sell(userId, coin, qty);
+    // BUY
+    @PostMapping("/trade/buy")
+    public String buy(@RequestBody java.util.Map<String, Object> body) {
+
+        Long userId = Long.parseLong(body.get("userId").toString());
+        String coin = (String) body.get("coin");
+        double amount = Double.parseDouble(body.get("amount").toString());
+
+        return service.buy(userId, coin, amount);
     }
 
-    @GetMapping("/value")
-    public double value(@RequestParam Long userId) {
-        return service.getPortfolioValue(userId);
+    // SELL
+    @PostMapping("/trade/sell")
+    public String sell(@RequestBody java.util.Map<String, Object> body) {
+
+        Long userId = Long.parseLong(body.get("userId").toString());
+        String coin = (String) body.get("coin");
+        double amount = Double.parseDouble(body.get("amount").toString());
+
+        return service.sell(userId, coin, amount);
     }
 
-    @GetMapping("/investment")
-    public double investment(@RequestParam Long userId) {
-        return service.getTotalInvestment(userId);
-    }
-
-    @GetMapping("/profit")
-    public double profit(@RequestParam Long userId) {
-        return service.getProfitOrLoss(userId);
+    // Portfolio
+    @GetMapping("/portfolio/{userId}")
+    public List<Portfolio> getPortfolio(@PathVariable Long userId) {
+        return service.getPortfolio(userId);
     }
 }

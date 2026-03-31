@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Crypto TradeHub</title>
 
     <style>
@@ -11,37 +12,28 @@
             color: white;
         }
 
-        h1 {
-            margin-top: 20px;
-        }
-
         .card {
             background: #1e293b;
-            margin: 10px auto;
-            padding: 15px;
-            width: 220px;
+            padding: 20px;
+            margin: 10px;
             border-radius: 10px;
+            display: inline-block;
         }
 
-        input {
-            padding: 8px;
+        input, button {
+            padding: 10px;
             margin: 5px;
-            border-radius: 5px;
-            border: none;
         }
 
         button {
-            padding: 8px 15px;
-            margin: 5px;
+            background: #22c55e;
             border: none;
-            border-radius: 5px;
-            background: #38bdf8;
-            color: black;
+            color: white;
             cursor: pointer;
         }
 
-        #portfolio {
-            margin-top: 20px;
+        .logout {
+            background: red;
         }
     </style>
 </head>
@@ -50,29 +42,28 @@
 
 <h1>🚀 Crypto TradeHub</h1>
 
-<!-- 🔥 LIVE PRICES -->
-<h2>Live Prices</h2>
-<div id="crypto-container">
-    Loading crypto data...
-</div>
+<button class="logout" onclick="logout()">Logout</button>
 
-<!-- 💰 TRADE SECTION -->
+<h2>Live Prices</h2>
+
+<div class="card">BTC: $<span id="btc">0</span></div>
+<div class="card">ETH: $<span id="eth">0</span></div>
+<div class="card">SOL: $<span id="sol">0</span></div>
+
 <h2>Trade</h2>
 
-<input id="coin" placeholder="coin (bitcoin)" />
-<input id="amount" placeholder="amount" />
+<input id="coin" placeholder="bitcoin">
+<input id="amount" type="number" placeholder="amount">
 
 <br>
 
-<button onclick="buy()">Buy</button>
-<button onclick="sell()">Sell</button>
+<button onclick="buyCoin()">Buy</button>
+<button onclick="sellCoin()">Sell</button>
 
-<!-- 📊 PORTFOLIO -->
 <h2>Portfolio</h2>
 <div id="portfolio"></div>
 
-<!-- ✅ ONLY ONE SCRIPT -->
-<script src="/js/app.js"></script>
+<script src="/js/app.js"></script> 
 
 </body>
 </html>
