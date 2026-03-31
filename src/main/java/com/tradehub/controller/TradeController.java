@@ -1,33 +1,45 @@
 package com.tradehub.controller;
 
-import com.tradehub.service.PortfolioService;
+import com.tradehub.model.Portfolio;
+import com.tradehub.service.TradeService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/trade")
-@CrossOrigin(origins = "*")
 public class TradeController {
 
-    private final PortfolioService service;
+    private final TradeService service;
 
-    public TradeController(PortfolioService service) {
+    public TradeController(TradeService service) {
         this.service = service;
     }
 
     @PostMapping("/buy")
-    public String buy(@RequestParam String coin, @RequestParam double amount) {
-        service.buy(coin, amount);
-        return "Bought " + amount + " of " + coin;
+    public Portfolio buy(@RequestParam Long userId,
+                         @RequestParam String coin,
+                         @RequestParam double qty) {
+        return service.buy(userId, coin, qty);
     }
 
     @PostMapping("/sell")
-    public String sell(@RequestParam String coin, @RequestParam double amount) {
-        service.sell(coin, amount);
-        return "Sold " + amount + " of " + coin;
+    public Portfolio sell(@RequestParam Long userId,
+                          @RequestParam String coin,
+                          @RequestParam double qty) {
+        return service.sell(userId, coin, qty);
     }
 
-    @GetMapping("/portfolio")
-    public Object getPortfolio() {
-        return service.getPortfolio().getHoldings();
+    @GetMapping("/value")
+    public double value(@RequestParam Long userId) {
+        return service.getPortfolioValue(userId);
+    }
+
+    @GetMapping("/investment")
+    public double investment(@RequestParam Long userId) {
+        return service.getTotalInvestment(userId);
+    }
+
+    @GetMapping("/profit")
+    public double profit(@RequestParam Long userId) {
+        return service.getProfitOrLoss(userId);
     }
 }
