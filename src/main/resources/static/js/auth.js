@@ -1,5 +1,7 @@
 const BASE_URL = "http://localhost:8080";
 
+console.log("AUTH JS LOADED");
+
 // REGISTER
 async function register() {
 

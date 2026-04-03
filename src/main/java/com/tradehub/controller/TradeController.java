@@ -19,9 +19,9 @@ public class TradeController {
 
     // GET prices
     @GetMapping("/prices")
-    public Map<String, Object> getPrices() {
-        return service.getPrices();
-    }
+public Map<String, Double> getPrices() {
+    return service.getPrices(); // ✅ FIXED
+}
 
     // BUY
     @PostMapping("/trade/buy")

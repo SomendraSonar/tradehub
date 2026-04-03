@@ -18,6 +18,18 @@
             margin: 10px;
             border-radius: 10px;
             display: inline-block;
+            min-width: 180px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .change {
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
         }
 
         input, button {
@@ -46,24 +58,38 @@
 
 <h2>Live Prices</h2>
 
-<div class="card">BTC: $<span id="btc">0</span></div>
-<div class="card">ETH: $<span id="eth">0</span></div>
-<div class="card">SOL: $<span id="sol">0</span></div>
+<div class="card">
+    BTC: 
+    <span id="btc" class="price">0</span>
+    <span id="btc-change" class="change">0%</span>
+</div>
+
+<div class="card">
+    ETH: 
+    <span id="eth" class="price">0</span>
+    <span id="eth-change" class="change">0%</span>
+</div>
+
+<div class="card">
+    SOL: 
+    <span id="sol" class="price">0</span>
+    <span id="sol-change" class="change">0%</span>
+</div>
 
 <h2>Trade</h2>
 
-<input id="coin" placeholder="bitcoin">
+<input id="coin" placeholder="btc / eth / sol">
 <input id="amount" type="number" placeholder="amount">
 
 <br>
 
-<button onclick="buyCoin()">Buy</button>
-<button onclick="sellCoin()">Sell</button>
+<button onclick="buy()">Buy</button>
+<button onclick="sell()">Sell</button>
 
 <h2>Portfolio</h2>
 <div id="portfolio"></div>
 
-<script src="/js/app.js"></script> 
+<script src="./js/app.js"></script>
 
 </body>
 </html>

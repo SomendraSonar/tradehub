@@ -2,8 +2,11 @@ package com.tradehub.service;
 
 import com.tradehub.model.Portfolio;
 import com.tradehub.repository.PortfolioRepository;
+import com.tradehub.config.PriceWebSocketHandler;
+
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
@@ -16,43 +19,88 @@ public class TradeService {
         this.repo = repo;
     }
 
-    // 🔥 REAL LIVE CRYPTO PRICES (CoinGecko API)
-    // 🔥 SAFE LIVE + FALLBACK PRICES
-    public Map<String, Object> getPrices() {
+    // 🔥 CACHE VARIABLES (IMPORTANT)
+    private Map<String, Double> cachedPrices = new HashMap<>();
+    private long lastFetchTime = 0;
 
-        String url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd";
+    // 🔥 LIVE PRICE (CACHE + API + WEBSOCKET)
+    public Map<String, Double> getPrices() {
 
-        RestTemplate restTemplate = new RestTemplate();
+        long now = System.currentTimeMillis();
+
+        // ✅ CACHE: avoid hitting API too frequently
+        if (now - lastFetchTime < 10000 && !cachedPrices.isEmpty()) {
+            return cachedPrices;
+        }
+
+        Map<String, Double> prices = new HashMap<>();
 
         try {
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-            return response;
+            System.out.println("🚀 CALLING API...");
+
+            String url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd";
+
+            java.net.URL apiUrl = new java.net.URL(url);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) apiUrl.openConnection();
+            conn.setRequestMethod("GET");
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("HTTP RESPONSE CODE: " + responseCode);
+
+            if (responseCode != 200) {
+                throw new RuntimeException("Rate limited");
+            }
+
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(conn.getInputStream())
+            );
+
+            StringBuilder response = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+
+            reader.close();
+
+            String json = response.toString();
+
+            prices.put("bitcoin", Double.parseDouble(json.split("\"bitcoin\":\\{\"usd\":")[1].split("}")[0]));
+            prices.put("ethereum", Double.parseDouble(json.split("\"ethereum\":\\{\"usd\":")[1].split("}")[0]));
+            prices.put("solana", Double.parseDouble(json.split("\"solana\":\\{\"usd\":")[1].split("}")[0]));
+
+            // ✅ UPDATE CACHE
+            cachedPrices = prices;
+            lastFetchTime = now;
 
         } catch (Exception e) {
+            System.out.println("⚠️ USING CACHED DATA");
 
-            // 🔥 Fallback if API fails (VERY IMPORTANT)
-            Map<String, Object> fallback = new HashMap<>();
+            if (!cachedPrices.isEmpty()) {
+                return cachedPrices;
+            }
 
-            Map<String, Double> btc = new HashMap<>();
-            btc.put("usd", 67000.0);
-
-            Map<String, Double> eth = new HashMap<>();
-            eth.put("usd", 2000.0);
-
-            Map<String, Double> sol = new HashMap<>();
-            sol.put("usd", 80.0);
-
-            fallback.put("bitcoin", btc);
-            fallback.put("ethereum", eth);
-            fallback.put("solana", sol);
-
-            System.out.println("⚠️ CoinGecko API failed, using fallback data");
-
-            return fallback;
+            prices.put("bitcoin", 67000.0);
+            prices.put("ethereum", 2000.0);
+            prices.put("solana", 80.0);
         }
+
+        // 🔥 WEBSOCKET BROADCAST
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String message = mapper.writeValueAsString(prices);
+
+            PriceWebSocketHandler.broadcastPrices(message);
+
+        } catch (Exception e) {
+            System.out.println("⚠️ WebSocket failed");
+        }
+
+        return prices;
     }
 
-    // 🔥 BUY
+    // 💰 BUY
     public String buy(Long userId, String coin, double amount) {
 
         Portfolio existing = repo.findByUserIdAndCoinName(userId, coin);
@@ -68,7 +116,7 @@ public class TradeService {
         return "Bought " + amount + " of " + coin;
     }
 
-    // 🔥 SELL
+    // 📉 SELL
     public String sell(Long userId, String coin, double amount) {
 
         Portfolio existing = repo.findByUserIdAndCoinName(userId, coin);
@@ -83,7 +131,7 @@ public class TradeService {
         return "Sold " + amount + " of " + coin;
     }
 
-    // 🔥 PORTFOLIO
+    // 📊 PORTFOLIO
     public List<Portfolio> getPortfolio(Long userId) {
         return repo.findByUserId(userId);
     }
